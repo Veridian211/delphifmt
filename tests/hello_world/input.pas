@@ -1,4 +1,6 @@
-program HelloWorld;
-begin
-    Writeln('Hello, World!');
+program 
+HelloWorld;
+bEgin Writeln('Hello, World!');
+
+
 end.
