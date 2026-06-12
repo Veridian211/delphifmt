@@ -19,7 +19,7 @@ const (
 )
 
 type Node interface {
-	nodeKind() NodeKind
+	NodeKind() NodeKind
 }
 
 // program
@@ -34,6 +34,8 @@ type ProgramNode struct {
 	Dot            *token.Token
 }
 
+func (*ProgramNode) NodeKind() NodeKind { return NodeProgram }
+
 // statements
 
 type StatementNode interface {
@@ -47,7 +49,7 @@ type MethodCallNode struct {
 	Semicolon    *token.Token
 }
 
-func (*MethodCallNode) nodeKind() NodeKind { return NodeMethodCall }
+func (*MethodCallNode) NodeKind() NodeKind { return NodeMethodCall }
 func (*MethodCallNode) statementNode()     {}
 
 type ArgumentListNode struct {
@@ -56,7 +58,7 @@ type ArgumentListNode struct {
 	RightParen *token.Token
 }
 
-func (*ArgumentListNode) nodeKind() NodeKind { return NodeArgumentList }
+func (*ArgumentListNode) NodeKind() NodeKind { return NodeArgumentList }
 func (*ArgumentListNode) statementNode()     {}
 
 type ArgNode struct {
@@ -64,5 +66,5 @@ type ArgNode struct {
 	Comma      *token.Token // optional
 }
 
-func (*ArgNode) nodeKind() NodeKind { return NodeArgument }
+func (*ArgNode) NodeKind() NodeKind { return NodeArgument }
 func (*ArgNode) statementNode()     {}

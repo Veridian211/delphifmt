@@ -1,6 +1,7 @@
 package main
 
 import (
+	"delphifmt/formatter"
 	"delphifmt/lexer"
 	"delphifmt/parser"
 	"fmt"
@@ -17,12 +18,9 @@ func main() {
 	lexer := lexer.NewLexer(string(data))
 	tokens := lexer.LexSrc()
 
-	// for _, tok := range tokens {
-	// 	tok.PrintDebugLn()
-	// }
-
 	parser := parser.NewParser(tokens)
 	ast := parser.ParseProgram()
 
-	fmt.Printf("%+v\n", ast)
+	formatter := formatter.NewFormatter()
+	fmt.Print(formatter.Format(&ast))
 }
