@@ -48,6 +48,7 @@ func (p *Parser) expect(t token.TokenType) *token.Token {
 				token.Type.ToDebug(),
 			),
 		})
+		// TODO: maybe return error token
 	}
 	return token
 }
