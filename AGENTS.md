@@ -22,10 +22,10 @@ Source → Lexer → Token-Stream → Parser → AST → Formatter → Output
                                         Linter → Diagnostics
 ```
 
-- **Lexer** — produces a token stream; compiler directives and comments are preserved as opaque tokens; aborts on invalid input.
-- **Parser** — builds an AST; `{$IFDEF}` branches are modelled as alternative subtrees; comments attach as trivia; collects errors best-effort.
-- **Formatter** — type-switch AST traversal; only modifies whitespace; must be idempotent.
-- **Linter** — independent AST traversal; emits diagnostics (line, col, message); never changes code unless `--fix`.
+- **Lexer** — produces a token stream; compiler directives and comments are preserved as opaque tokens; aborts on invalid input. More information in [/.clanker/lexer.md](/.clanker/lexer.md).
+- **Parser** — builds an AST; `{$IFDEF}` branches are modelled as alternative subtrees; comments attach as trivia; collects errors best-effort. More information in [/.clanker/parser.md](/.clanker/parser.md).
+- **Formatter** — type-switch AST traversal; only modifies whitespace; must be idempotent. More information in [/.clanker/formatter.md](/.clanker/formatter.md).
+- **Linter** — independent AST traversal; emits diagnostics (line, col, message); never changes code unless `--fix`. More information in [/.clanker/linter.md](/.clanker/linter.md).
 
 ## Formatting rules
 
