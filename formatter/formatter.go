@@ -2,6 +2,8 @@ package formatter
 
 import (
 	"delphifmt/ast"
+	"delphifmt/token"
+	"fmt"
 	"strings"
 )
 
@@ -44,6 +46,19 @@ func (f *Formatter) writeIndent() {
 	}
 }
 
+func (f *Formatter) writeKeyword(t *token.Token) {
+	var keyword string
+	switch f.options.KeywordCase {
+	case KeywordLowercase:
+		keyword = strings.ToLower(t.Value)
+	case KeywordUppercase:
+		keyword = strings.ToUpper(string(t.Value[0])) + strings.ToLower(t.Value[1:])
+	default:
+		panic(fmt.Sprintf("Unknown option for keywordCase: %s", t.Value))
+	}
+	f.write(keyword)
+}
+
 func (f *Formatter) Format(node ast.Node) string {
 	f.output.Reset()
 	f.formatInternal(node)
@@ -58,20 +73,19 @@ func (f *Formatter) formatInternal(node ast.Node) {
 }
 
 func (f *Formatter) formatProgramNode(node ast.ProgramNode) {
+	f.writeKeyword(node.ProgramKeyword)
 	f.writeLn(
-		node.ProgramKeyword.Value,
 		" ",
 		node.Name.Value,
 		node.Semicolon.Value,
 	)
-	f.writeLn(node.Begin.Value)
+	f.writeKeyword(node.Begin)
+	f.writeLn()
 	f.depth++
 	f.formatStatements(node.Statements)
 	f.depth--
-	f.writeLn(
-		node.End.Value,
-		node.Dot.Value,
-	)
+	f.writeKeyword(node.End)
+	f.writeLn(node.Dot.Value)
 }
 
 func (f *Formatter) formatStatements(nodes []*ast.StatementNode) {
