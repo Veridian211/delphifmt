@@ -1,6 +1,7 @@
 package formatter_test
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -45,6 +46,13 @@ func TestGolden(t *testing.T) {
 
 func formatSource(src string) string {
 	tokens := lexer.NewLexer(src).LexSrc()
-	node := parser.NewParser(tokens).ParseProgram()
+
+	parser := parser.NewParser(tokens)
+	node, ok := parser.ParseProgram()
+	if !ok {
+		for _, err := range parser.GetErrors() {
+			fmt.Println(err)
+		}
+	}
 	return formatter.NewFormatter().Format(&node)
 }

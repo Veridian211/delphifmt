@@ -12,12 +12,6 @@ type Parser struct {
 	errors []ParseError
 }
 
-type ParseError struct {
-	line    int
-	col     int
-	message string
-}
-
 func NewParser(tokens []token.Token) *Parser {
 	return &Parser{
 		tokens: tokens,
@@ -42,9 +36,8 @@ func (p *Parser) expect(t token.TokenType) *token.Token {
 			line: token.Line,
 			col:  token.Col,
 			message: fmt.Sprintf(
-				"Line %d, Col %d: Expected token %s",
-				token.Line,
-				token.Col,
+				"Expected %s, got %s",
+				t.ToDebug(),
 				token.Type.ToDebug(),
 			),
 		})
@@ -57,7 +50,15 @@ func (p *Parser) printPeek() {
 	p.peek().PrintDebugLn()
 }
 
-func (p *Parser) ParseProgram() ast.ProgramNode {
+func (p *Parser) GetErrors() []ParseError {
+	return p.errors
+}
+
+func (p *Parser) hasNoErrors() bool {
+	return len(p.errors) == 0
+}
+
+func (p *Parser) ParseProgram() (ast.ProgramNode, bool) {
 	node := ast.ProgramNode{}
 	node.ProgramKeyword = p.expect(token.TokenProgram)
 	node.Name = p.expect(token.TokenIdentifier)
@@ -69,7 +70,7 @@ func (p *Parser) ParseProgram() ast.ProgramNode {
 	}
 	node.End = p.expect(token.TokenEnd)
 	node.Dot = p.expect(token.TokenDot)
-	return node
+	return node, p.hasNoErrors()
 }
 
 func (p *Parser) ParseStatement() ast.StatementNode {

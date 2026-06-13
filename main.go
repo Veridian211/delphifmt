@@ -4,22 +4,31 @@ import (
 	"delphifmt/formatter"
 	"delphifmt/lexer"
 	"delphifmt/parser"
+	"delphifmt/token"
 	"fmt"
-	"log"
 	"os"
 )
 
 func main() {
-	data, err := os.ReadFile("tests/hello_world/input.pas")
+	filename := "tests/comments/input.pas"
+
+	data, err := os.ReadFile(filename)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("Error: File %s not found.\n", filename)
 	}
 
 	lexer := lexer.NewLexer(string(data))
 	tokens := lexer.LexSrc()
 
+	token.PrintDebugLn(tokens)
+
 	parser := parser.NewParser(tokens)
-	ast := parser.ParseProgram()
+	ast, ok := parser.ParseProgram()
+	if !ok {
+		for _, err := range parser.GetErrors() {
+			fmt.Println(err.String())
+		}
+	}
 
 	formatter := formatter.NewFormatter()
 	fmt.Print(formatter.Format(&ast))

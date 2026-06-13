@@ -37,6 +37,13 @@ func (l *Lexer) peek() byte {
 	return l.src[l.pos]
 }
 
+func (l *Lexer) peekNext() byte {
+	if l.pos+1 >= len(l.src) {
+		return 0
+	}
+	return l.src[l.pos+1]
+}
+
 func (l *Lexer) advance() byte {
 	b := l.src[l.pos]
 	l.pos++
@@ -50,7 +57,12 @@ func (l *Lexer) advance() byte {
 }
 
 func (l *Lexer) tok(t token.TokenType, value string) token.Token {
-	return token.Token{Type: t, Value: value, Line: l.line, Col: l.col}
+	return token.Token{
+		Type:  t,
+		Value: value,
+		Line:  l.line,
+		Col:   l.col - len(value),
+	}
 }
 
 func (l *Lexer) nextToken() token.Token {
@@ -61,7 +73,7 @@ func (l *Lexer) nextToken() token.Token {
 	ch := l.peek()
 
 	switch {
-	case ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r':
+	case isWhitespace(ch):
 		l.advance()
 		return l.nextToken()
 
@@ -69,7 +81,14 @@ func (l *Lexer) nextToken() token.Token {
 		l.advance()
 		return l.tok(token.TokenSemicolon, string(ch))
 
+	case ch == '.':
+		l.advance()
+		return l.tok(token.TokenDot, string(ch))
+
 	case ch == '(':
+		if l.peekNext() == '*' {
+			return l.readParenBlockComment()
+		}
 		l.advance()
 		return l.tok(token.TokenParenLeft, string(ch))
 
@@ -77,9 +96,15 @@ func (l *Lexer) nextToken() token.Token {
 		l.advance()
 		return l.tok(token.TokenParenRight, string(ch))
 
-	case ch == '.':
+	case ch == '/':
+		if l.peekNext() == '/' {
+			return l.readLineComment()
+		}
 		l.advance()
-		return l.tok(token.TokenDot, string(ch))
+		return l.tok(token.TokenSlash, string(ch))
+
+	case ch == '{':
+		return l.readCurlyBlockComment()
 
 	case ch == '\'':
 		return l.readString()
@@ -98,7 +123,7 @@ func (l *Lexer) nextToken() token.Token {
 func (l *Lexer) readIdentifier() token.Token {
 	start := l.pos
 	for l.pos < len(l.src) && (isLetter(l.src[l.pos]) || isDigit(l.src[l.pos])) {
-		l.pos++
+		l.advance()
 	}
 	ident := l.src[start:l.pos]
 	switch {
@@ -115,7 +140,7 @@ func (l *Lexer) readIdentifier() token.Token {
 func (l *Lexer) readNumber() token.Token {
 	start := l.pos
 	for l.pos < len(l.src) && isDigit(l.src[l.pos]) {
-		l.pos++
+		l.advance()
 	}
 	return l.tok(token.TokenNumber, l.src[start:l.pos])
 }
@@ -124,8 +149,8 @@ func (l *Lexer) readString() token.Token {
 	start := l.pos
 	l.advance()
 	for l.pos < len(l.src) {
-		b := l.advance()
-		if b == '\'' {
+		ch := l.advance()
+		if ch == '\'' {
 			if l.peek() == '\'' {
 				l.advance()
 				continue
@@ -134,6 +159,45 @@ func (l *Lexer) readString() token.Token {
 		}
 	}
 	return l.tok(token.TokenString, l.src[start:l.pos])
+}
+
+func (l *Lexer) readLineComment() token.Token {
+	start := l.pos
+	l.advance()
+	for l.pos < len(l.src) && l.src[l.pos] != '\n' {
+		l.advance()
+	}
+	return l.tok(token.TokenLineComment, l.src[start:l.pos])
+}
+
+func (l *Lexer) readParenBlockComment() token.Token {
+	start := l.pos
+	l.advance() // skip (
+	l.advance() // skip *
+	for l.pos < len(l.src) {
+		ch := l.advance()
+		if ch == '*' {
+			if l.peek() == ')' {
+				l.advance()
+				break
+			}
+		}
+	}
+	return l.tok(token.TokenBlockComment, l.src[start:l.pos])
+}
+
+func (l *Lexer) readCurlyBlockComment() token.Token {
+	start := l.pos
+	l.advance()
+	for l.pos < len(l.src) && l.src[l.pos] != '}' {
+		l.advance()
+	}
+	l.advance()
+	return l.tok(token.TokenBlockComment, l.src[start:l.pos])
+}
+
+func isWhitespace(b byte) bool {
+	return b == ' ' || b == '\t' || b == '\n' || b == '\r'
 }
 
 func isLetter(b byte) bool {

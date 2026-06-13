@@ -11,10 +11,16 @@ type Token struct {
 
 func (t *Token) PrintDebugLn() {
 	fmt.Printf(
-		"Line: %d  Col: %d  Type: %s  Value: %s\n",
+		"Line: %d, Col: %d, Type: %s, Value: %s\n",
 		t.Line,
 		t.Col,
 		t.Type.ToDebug(),
 		t.Value,
 	)
+}
+
+func PrintDebugLn(tokens []Token) {
+	for _, t := range tokens {
+		t.PrintDebugLn()
+	}
 }

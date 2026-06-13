@@ -22,9 +22,15 @@ type Node interface {
 	NodeKind() NodeKind
 }
 
+type Comments struct {
+	LeadingComments  []*token.Token
+	TrailingComments []*token.Token
+}
+
 // program
 
 type ProgramNode struct {
+	Comments
 	ProgramKeyword *token.Token
 	Name           *token.Token
 	Semicolon      *token.Token
@@ -44,6 +50,7 @@ type StatementNode interface {
 }
 
 type MethodCallNode struct {
+	Comments
 	Name         *token.Token
 	ArgumentList ArgumentListNode
 	Semicolon    *token.Token
@@ -53,6 +60,7 @@ func (*MethodCallNode) NodeKind() NodeKind { return NodeMethodCall }
 func (*MethodCallNode) statementNode()     {}
 
 type ArgumentListNode struct {
+	Comments
 	LeftParen  *token.Token
 	Args       []*ArgNode
 	RightParen *token.Token
@@ -62,6 +70,7 @@ func (*ArgumentListNode) NodeKind() NodeKind { return NodeArgumentList }
 func (*ArgumentListNode) statementNode()     {}
 
 type ArgNode struct {
+	Comments
 	Expression *token.Token
 	Comma      *token.Token // optional
 }
