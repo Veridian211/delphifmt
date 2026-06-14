@@ -20,17 +20,84 @@ func NewFormatter() *Formatter {
 	}
 }
 
-func (f *Formatter) write(input ...string) {
-	for _, s := range input {
-		f.output.WriteString(s)
+func (f *Formatter) writeToken(t *token.Token) {
+	for _, leading := range t.LeadingComments {
+		f.writeIndent()
+		f.writeComment(leading)
+		f.writeLn()
+	}
+
+	if f.output.Len() > 0 {
+		lastChar := f.output.String()[f.output.Len()-1]
+		if lastChar == '\n' {
+			f.writeIndent()
+		}
+	}
+
+	if t.Type.IsKeyword() {
+		f.writeKeyword(t)
+	} else {
+		f.write(t.Value)
+	}
+
+	for _, trailing := range t.TrailingComments {
+		f.write(" ")
+		f.writeComment(trailing)
+		if trailing.Type == token.TokenLineComment {
+			f.writeLn()
+		}
 	}
 }
-
-func (f *Formatter) writeLn(input ...string) {
-	for _, s := range input {
-		f.output.WriteString(s)
+func (f *Formatter) writeKeyword(t *token.Token) {
+	var keyword string
+	switch f.options.KeywordCase {
+	case KeywordLowercase:
+		keyword = strings.ToLower(t.Value)
+	case KeywordUppercase:
+		keyword = strings.ToUpper(string(t.Value[0])) + strings.ToLower(t.Value[1:])
+	default:
+		panic(fmt.Sprintf("Unknown option for keywordCase: %s", t.Value))
 	}
-	f.output.WriteString("\n")
+	f.write(keyword)
+}
+
+func (f *Formatter) writeComment(t *token.Token) {
+	switch t.Type {
+	case token.TokenLineComment:
+		var start int
+		for i := 2; i < len(t.Value); i++ {
+			if t.Value[i] != ' ' {
+				start = i
+				break
+			}
+		}
+		f.write("// " + t.Value[start:])
+	case token.TokenBlockComment:
+		switch t.Value[0] {
+		case '{':
+			var start int
+			for i := 1; i < len(t.Value); i++ {
+				if t.Value[i] != ' ' {
+					start = i
+					break
+				}
+			}
+			var end int
+			for i := len(t.Value) - 2; i > 1; i-- {
+				if t.Value[i] != ' ' {
+					end = i
+					break
+				}
+			}
+			f.write("{ " + t.Value[start:end+1] + " }")
+		case '(':
+			f.write(t.Value)
+		default:
+			panic("Unreachable")
+		}
+	default:
+		panic(fmt.Sprintf("Token is not a comment: %s", t.Value))
+	}
 }
 
 func (f *Formatter) writeIndent() {
@@ -46,17 +113,17 @@ func (f *Formatter) writeIndent() {
 	}
 }
 
-func (f *Formatter) writeKeyword(t *token.Token) {
-	var keyword string
-	switch f.options.KeywordCase {
-	case KeywordLowercase:
-		keyword = strings.ToLower(t.Value)
-	case KeywordUppercase:
-		keyword = strings.ToUpper(string(t.Value[0])) + strings.ToLower(t.Value[1:])
-	default:
-		panic(fmt.Sprintf("Unknown option for keywordCase: %s", t.Value))
+func (f *Formatter) write(input ...string) {
+	for _, s := range input {
+		f.output.WriteString(s)
 	}
-	f.write(keyword)
+}
+
+func (f *Formatter) writeLn(input ...string) {
+	for _, s := range input {
+		f.output.WriteString(s)
+	}
+	f.output.WriteString("\n")
 }
 
 func (f *Formatter) Format(node ast.Node) string {
@@ -73,24 +140,24 @@ func (f *Formatter) formatInternal(node ast.Node) {
 }
 
 func (f *Formatter) formatProgramNode(node ast.ProgramNode) {
-	f.writeKeyword(node.ProgramKeyword)
-	f.writeLn(
-		" ",
-		node.Name.Value,
-		node.Semicolon.Value,
-	)
-	f.writeKeyword(node.Begin)
+	f.writeToken(node.ProgramKeyword)
+	f.write(" ")
+	f.writeToken(node.Name)
+	f.writeToken(node.Semicolon)
+	f.writeLn()
+
+	f.writeToken(node.Begin)
 	f.writeLn()
 	f.depth++
 	f.formatStatements(node.Statements)
 	f.depth--
-	f.writeKeyword(node.End)
-	f.writeLn(node.Dot.Value)
+	f.writeToken(node.End)
+	f.writeToken(node.Dot)
+	f.writeLn()
 }
 
 func (f *Formatter) formatStatements(nodes []*ast.StatementNode) {
 	for _, node := range nodes {
-		f.writeIndent()
 		f.formatStatement(*node)
 		f.writeLn()
 	}
@@ -104,25 +171,23 @@ func (f *Formatter) formatStatement(node ast.StatementNode) {
 }
 
 func (f *Formatter) formatMethodCall(node ast.MethodCallNode) {
-	f.write(node.Name.Value)
+	f.writeToken(node.Name)
 	f.formatArgumentList(node.ArgumentList)
-	f.write(node.Semicolon.Value)
+	f.writeToken(node.Semicolon)
 }
 
 func (f *Formatter) formatArgumentList(node ast.ArgumentListNode) {
-	f.write(node.LeftParen.Value)
+	f.writeToken(node.LeftParen)
 	for _, arg := range node.Args {
 		f.formatArgument(*arg)
 	}
-	f.write(node.RightParen.Value)
+	f.writeToken(node.RightParen)
 }
 
 func (f *Formatter) formatArgument(node ast.ArgNode) {
-	f.write(node.Expression.Value)
+	f.writeToken(node.Expression)
 	if node.Comma != nil {
-		f.write(
-			node.Comma.Value,
-			" ",
-		)
+		f.writeToken(node.Comma)
+		f.write(" ")
 	}
 }

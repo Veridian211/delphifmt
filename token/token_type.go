@@ -218,6 +218,29 @@ var TokenTypeStr = map[TokenType]string{
 	TokenNumber:     "<number>",
 }
 
+func (t TokenType) IsKeyword() bool {
+	switch t {
+	case TokenProgram, TokenBegin, TokenEnd,
+		TokenUnit, TokenInterface, TokenUses, TokenImplementation, TokenInitialization, TokenFinalization,
+		TokenLibrary, TokenExports,
+		TokenType_, TokenArray, TokenSet, TokenFile, TokenClass, TokenRecord, TokenPacked,
+		TokenConstructor, TokenDestructor, TokenInherited, TokenProperty,
+		TokenProcedure, TokenFunction,
+		TokenVar, TokenConst, TokenOut, TokenThreadVar, TokenResourcestring,
+		TokenIf, TokenThen, TokenElse,
+		TokenCase, TokenOf,
+		TokenFor, TokenTo, TokenDownTo, TokenIn, TokenDo, TokenWhile, TokenRepeat, TokenUntil,
+		TokenWith,
+		TokenGoTo, TokenLabel,
+		TokenTry, TokenFinally, TokenExcept, TokenRaise,
+		TokenNot, TokenAnd, TokenOr, TokenXOr,
+		TokenIs, TokenMod, TokenDiv, TokenShl, TokenShr,
+		TokenNil:
+		return true
+	}
+	return false
+}
+
 func (t TokenType) ToDebug() string {
 	str, ok := TokenTypeStr[t]
 	if !ok {

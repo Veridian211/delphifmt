@@ -27,6 +27,7 @@ func (l *Lexer) LexSrc() []token.Token {
 			break
 		}
 	}
+	tokens = l.appendTrivia(tokens)
 	return tokens
 }
 
@@ -57,12 +58,12 @@ func (l *Lexer) advance() byte {
 }
 
 func (l *Lexer) tok(t token.TokenType, value string) token.Token {
-	return token.Token{
-		Type:  t,
-		Value: value,
-		Line:  l.line,
-		Col:   l.col - len(value),
-	}
+	return *token.CreateToken(
+		t,
+		value,
+		l.line,
+		l.col-len(value),
+	)
 }
 
 func (l *Lexer) nextToken() token.Token {
@@ -206,4 +207,33 @@ func isLetter(b byte) bool {
 
 func isDigit(b byte) bool {
 	return b >= '0' && b <= '9'
+}
+
+func (*Lexer) appendTrivia(tokens []token.Token) []token.Token {
+	result := make([]token.Token, 0, len(tokens))
+	i := 0
+	for i < len(tokens) {
+		var leadingComments []*token.Token
+		for i < len(tokens) && tokens[i].IsComment() {
+			leadingComments = append(leadingComments, &tokens[i])
+			i++
+		}
+		if i >= len(tokens) {
+			break
+		}
+
+		tok := tokens[i]
+		tok.LeadingComments = leadingComments
+		i++
+
+		for i < len(tokens) && tokens[i].IsComment() {
+			if tokens[i].Line > tok.Line {
+				break
+			}
+			tok.TrailingComments = append(tok.TrailingComments, &tokens[i])
+			i++
+		}
+		result = append(result, tok)
+	}
+	return result
 }

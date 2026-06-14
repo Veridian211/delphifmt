@@ -1,7 +1,8 @@
 // Program Hello world
-program 
+program //comment
 HelloWorld; // this is a line comment
-bEgin {  This is a weird block comment } Writeln('Hello, World!');
-
-
-end.
+bEgin {  This is a weird block comment } 
+    // this writes to stdout
+    Writeln('Hello, World!');
+end. //test
+// test after end.
