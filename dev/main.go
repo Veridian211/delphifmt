@@ -10,7 +10,13 @@ import (
 )
 
 func main() {
-	filename := "./formatter/tests/comments/input.pas"
+	var filename string
+	if len(os.Args) > 1 {
+		testCase := os.Args[1]
+		filename = fmt.Sprintf("./formatter/tests/%s/input.pas", testCase)
+	} else {
+		filename = "./formatter/tests/comments/input.pas"
+	}
 
 	data, err := os.ReadFile(filename)
 	if err != nil {

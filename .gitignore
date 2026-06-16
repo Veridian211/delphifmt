@@ -31,5 +31,6 @@ go.work.sum
 # .idea/
 # .vscode/
 
+bin/*
 output.pas
 output_idempotent.pas
