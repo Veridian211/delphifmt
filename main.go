@@ -10,11 +10,12 @@ import (
 )
 
 func main() {
-	filename := "tests/comments/input.pas"
+	filename := "./formatter/tests/comments/input.pas"
 
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		fmt.Printf("Error: File %s not found.\n", filename)
+		os.Exit(1)
 	}
 
 	lexer := lexer.NewLexer(string(data))
@@ -28,6 +29,7 @@ func main() {
 		for _, err := range parser.GetErrors() {
 			fmt.Println(err.String())
 		}
+		os.Exit(1)
 	}
 
 	formatter := formatter.NewFormatter()

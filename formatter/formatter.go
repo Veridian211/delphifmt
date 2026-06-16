@@ -84,18 +84,18 @@ func (f *Formatter) write(input ...string) {
 	}
 }
 
-func (f *Formatter) lastChar() byte {
-	if f.output.Len() == 0 {
-		return 0
-	}
-	return f.output.String()[f.output.Len()-1]
-}
-
 func (f *Formatter) writeLn(input ...string) {
 	for _, s := range input {
 		f.output.WriteString(s)
 	}
 	f.output.WriteString("\n")
+}
+
+func (f *Formatter) lastChar() byte {
+	if f.output.Len() == 0 {
+		return 0
+	}
+	return f.output.String()[f.output.Len()-1]
 }
 
 func (f *Formatter) Format(node ast.Node) string {
