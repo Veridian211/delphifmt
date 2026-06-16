@@ -145,12 +145,15 @@ delphi-fmt/
  
 - Jeder Testfall besteht aus zwei Dateien: `input.pas` und `expected.pas`.
 - Der Formatter wird auf `input.pas` ausgeführt und das Ergebnis mit `expected.pas` verglichen.
-- Idempotenz wird explizit getestet: `expected.pas` durch den Formatter gejagt muss identisch bleiben.
+- Idempotenz wird explizit getestet: der Output wird ein zweites Mal formatiert und muss identisch bleiben.
+- Bei Abweichungen werden `output.pas` und `output_idempotent.pas` geschrieben und per `git diff --no-index` gegen `expected.pas` bzw. `output.pas` gedifft.
 ```
-tests/
+formatter/tests/
   case_of/
     input.pas
     expected.pas
+    output.pas               ← vom Test geschrieben (erster Pass)
+    output_idempotent.pas    ← vom Test geschrieben (zweiter Pass)
   ifdef_branch/
     input.pas
     expected.pas

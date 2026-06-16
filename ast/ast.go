@@ -32,6 +32,7 @@ type ProgramNode struct {
 	Statements     []*StatementNode
 	End            *token.Token
 	Dot            *token.Token
+	Eof            *token.Token
 }
 
 func (*ProgramNode) NodeKind() NodeKind { return NodeProgram }

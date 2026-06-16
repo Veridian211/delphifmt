@@ -75,6 +75,10 @@ func (l *Lexer) nextToken() token.Token {
 
 	switch {
 	case isWhitespace(ch):
+		if ch == '\n' && l.peekNext() == '\n' {
+			l.advance()
+			return l.tok(token.TokenNewline, string(ch))
+		}
 		l.advance()
 		return l.nextToken()
 
@@ -213,9 +217,9 @@ func (*Lexer) appendTrivia(tokens []token.Token) []token.Token {
 	result := make([]token.Token, 0, len(tokens))
 	i := 0
 	for i < len(tokens) {
-		var leadingComments []*token.Token
-		for i < len(tokens) && tokens[i].IsComment() {
-			leadingComments = append(leadingComments, &tokens[i])
+		var leadingTrivia []*token.Token
+		for i < len(tokens) && (tokens[i].IsComment() || tokens[i].IsNewLine()) {
+			leadingTrivia = append(leadingTrivia, &tokens[i])
 			i++
 		}
 		if i >= len(tokens) {
@@ -223,14 +227,14 @@ func (*Lexer) appendTrivia(tokens []token.Token) []token.Token {
 		}
 
 		tok := tokens[i]
-		tok.LeadingComments = leadingComments
+		tok.LeadingTrivia = leadingTrivia
 		i++
 
 		for i < len(tokens) && tokens[i].IsComment() {
 			if tokens[i].Line > tok.Line {
 				break
 			}
-			tok.TrailingComments = append(tok.TrailingComments, &tokens[i])
+			tok.TrailingTrivia = append(tok.TrailingTrivia, &tokens[i])
 			i++
 		}
 		result = append(result, tok)

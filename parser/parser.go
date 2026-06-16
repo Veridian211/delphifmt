@@ -70,6 +70,7 @@ func (p *Parser) ParseProgram() (ast.ProgramNode, bool) {
 	}
 	node.End = p.expect(token.TokenEnd)
 	node.Dot = p.expect(token.TokenDot)
+	node.Eof = p.expect(token.TokenEOF)
 	return node, p.hasNoErrors()
 }
 

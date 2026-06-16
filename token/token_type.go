@@ -7,6 +7,8 @@ type TokenType int
 const (
 	TokenEOF = iota
 
+	TokenNewline
+
 	TokenLineComment
 	TokenBlockComment
 
@@ -114,6 +116,8 @@ const (
 
 var TokenTypeStr = map[TokenType]string{
 	TokenEOF: "<EOF>",
+
+	TokenNewline: "<newline>",
 
 	TokenLineComment:  "<line-comment>",
 	TokenBlockComment: "<block-comment>",

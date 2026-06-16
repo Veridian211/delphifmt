@@ -65,5 +65,9 @@ lexer/
 ast/
 parser/
 formatter/   (formatter.go, options.go, stmt.go, expr.go, decl.go, comment.go)
-tests/       (golden files per case)
 ```
+
+## Running the project
+
+Run main.go with `make run`.
+Run tests with `make test`.
