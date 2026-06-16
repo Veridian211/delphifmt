@@ -131,8 +131,10 @@ func (f *Formatter) formatProgramNode(node ast.ProgramNode) {
 	f.depth--
 	f.writeToken(node.End)
 	f.writeToken(node.Dot)
+	if f.lastChar() != '\n' {
+		f.writeLn()
+	}
 	f.writeToken(node.Eof)
-	f.writeLn()
 }
 
 func (f *Formatter) formatStatements(nodes []*ast.StatementNode) {
