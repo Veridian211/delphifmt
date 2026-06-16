@@ -38,7 +38,7 @@ func (f *Formatter) writeToken(t *token.Token) {
 		}
 	}
 
-	if t.Type.IsKeyword() {
+	if t.IsKeyword() {
 		f.writeKeyword(t)
 	} else {
 		f.write(t.Value)
